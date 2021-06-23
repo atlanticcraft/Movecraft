@@ -128,7 +128,7 @@ public class DetectionTask extends AsyncTask {
         if (hitBox.isEmpty()) return;
 
         MovecraftLocation middle = hitBox.getMidPoint();
-
+        int minY = hitBox.getMinY();
         int testY = minY;
         while (testY > 0){
             testY--;

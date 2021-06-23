@@ -388,8 +388,8 @@ public class TranslationTask extends AsyncTask {
         }
 
         if (craft.getType().getMinWaterDepth() > 0 || craft.getType().getMaxWaterDepth() >= 0) {
-            final MovecraftLocation middle = oldHitBox.getMidPoint();
-            int testY = minY;
+            final MovecraftLocation middle = newHitBox.getMidPoint();
+            int testY = newHitBox.getMinY();
             while (testY > 0){
                 testY--;
                 Material testType = craft.getWorld().getBlockAt(middle.getX(),testY,middle.getZ()).getType();
@@ -398,7 +398,7 @@ public class TranslationTask extends AsyncTask {
                     break;
             }
 
-            int waterDepth = minY - testY - 1;
+            int waterDepth = newHitBox.getMinY() - testY - 1;
 
             if (waterDepth < craft.getType().getMinWaterDepth()) {
                 fail(String.format(I18nSupport.getInternationalisedString("Translation - Failed Craft hit minimum water depth limit"), craft.getType().getMinWaterDepth()));
