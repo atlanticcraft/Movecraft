@@ -370,17 +370,44 @@ public class TranslationTask extends AsyncTask {
             }
         }
 
-        if (craft.getType().getForbiddenHoverOverBlocks().size() > 0){
+        if (craft.getType().getForbiddenHoverOverBlocks().size() > 0 || craft.getType().getRequireWaterContact()){
             MovecraftLocation test = new MovecraftLocation(newHitBox.getMidPoint().getX(), newHitBox.getMinY(), newHitBox.getMidPoint().getZ());
             test = test.translate(0, -1, 0);
-            while (test.toBukkit(world).getBlock().getType() == Material.AIR){
-                test = test.translate(0, -1, 0);
+            if (craft.getType().getForbiddenHoverOverBlocks().size() > 0) {
+                while (test.toBukkit(world).getBlock().getType() == Material.AIR){
+                    test = test.translate(0, -1, 0);
+                }
             }
             Material testType = test.toBukkit(world).getBlock().getType();
+            if (craft.getType().getRequireWaterContact() && testType != Material.WATER) {
+                fail(I18nSupport.getInternationalisedString("Detection - Failed - Water contact required but not found"));
+            }
             if (craft.getType().getForbiddenHoverOverBlocks().contains(testType)){
                 fail(String.format(I18nSupport.getInternationalisedString("Translation - Failed Craft over block"), testType.name().toLowerCase().replace("_", " ")));
             }
         }
+
+        if (craft.getType().getMinWaterDepth() > 0 || craft.getType().getMaxWaterDepth() >= 0) {
+            final MovecraftLocation middle = oldHitBox.getMidPoint();
+            int testY = minY;
+            while (testY > 0){
+                testY--;
+                Material testType = craft.getWorld().getBlockAt(middle.getX(),testY,middle.getZ()).getType();
+                if (testType != Material.WATER &&
+                        !craft.getType().getPassthroughBlocks().contains(testType))
+                    break;
+            }
+
+            int waterDepth = minY - testY - 1;
+
+            if (waterDepth < craft.getType().getMinWaterDepth()) {
+                fail(String.format(I18nSupport.getInternationalisedString("Translation - Failed Craft hit minimum water depth limit"), craft.getType().getMinWaterDepth()));
+            }
+            if (waterDepth > craft.getType().getMaxWaterDepth()) {
+                fail(String.format(I18nSupport.getInternationalisedString("Translation - Failed Craft hit maximum water depth limit"), craft.getType().getMaxWaterDepth()));
+            }
+        }
+
         //call event
         CraftTranslateEvent translateEvent = new CraftTranslateEvent(craft, oldHitBox, newHitBox, world);
         Bukkit.getServer().getPluginManager().callEvent(translateEvent);

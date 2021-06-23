@@ -64,6 +64,7 @@ public class DetectionTask extends AsyncTask {
     private boolean failed;
     private boolean waterContact;
     @NotNull private String failMessage = "";
+    private int waterDepth;
 
     public DetectionTask(Craft c, @NotNull MovecraftLocation startLocation, @Nullable Player player, @NotNull Player notificationPlayer) {
         super(c);
@@ -89,6 +90,7 @@ public class DetectionTask extends AsyncTask {
             detectSurrounding(blockStack.pop());
         } while (!blockStack.isEmpty());
         detectInterior();
+        detectWaterDepth();
         if (failed) {
             return;
         }
@@ -119,6 +121,24 @@ public class DetectionTask extends AsyncTask {
         if (Settings.Debug){
             Bukkit.broadcastMessage("Detection took (ms): " + (endTime - startTime));
         }
+    }
+
+    private void detectWaterDepth() {
+        if (!waterContact) return;
+        if (hitBox.isEmpty()) return;
+
+        MovecraftLocation middle = hitBox.getMidPoint();
+
+        int testY = minY;
+        while (testY > 0){
+            testY--;
+            Material testType = craft.getWorld().getBlockAt(middle.getX(),testY,middle.getZ()).getType();
+            if (testType != Material.WATER &&
+                    !craft.getType().getPassthroughBlocks().contains(testType))
+                break;
+        }
+
+        waterDepth = minY - testY - 1;
     }
 
     private void detectInterior() {
@@ -398,6 +418,14 @@ public class DetectionTask extends AsyncTask {
                                                  HashMap<Set<MovecraftBlock>, Integer> countData) {
         if (getCraft().getType().getRequireWaterContact() && !waterContact) {
             fail(I18nSupport.getInternationalisedString("Detection - Failed - Water contact required but not found"));
+            return false;
+        }
+        if (waterDepth < getCraft().getType().getMinWaterDepth()) {
+            fail(String.format(I18nSupport.getInternationalisedString("Translation - Failed Craft hit minimum water depth limit"), craft.getType().getMinWaterDepth()));
+            return false;
+        }
+        if (craft.getType().getMaxWaterDepth() >= 0 && waterDepth > craft.getType().getMaxWaterDepth()) {
+            fail(String.format(I18nSupport.getInternationalisedString("Translation - Failed Craft hit maximum water depth limit"), craft.getType().getMaxWaterDepth()));
             return false;
         }
         for (BlockLimitManager.Entry i : flyBlocks.getEntries()) {
