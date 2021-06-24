@@ -379,7 +379,8 @@ public class TranslationTask extends AsyncTask {
                 }
             }
             Material testType = test.toBukkit(world).getBlock().getType();
-            if (craft.getType().getRequireWaterContact() && testType != Material.WATER) {
+            if (craft.getType().getRequireWaterContact() && testType != Material.WATER &&
+                    !craft.getType().getPassthroughBlocks().contains(testType)) {
                 fail(I18nSupport.getInternationalisedString("Detection - Failed - Water contact required but not found"));
             }
             if (craft.getType().getForbiddenHoverOverBlocks().contains(testType)){
