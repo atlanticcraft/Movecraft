@@ -35,6 +35,7 @@ import net.countercraft.movecraft.mapUpdater.MapUpdateManager;
 import net.countercraft.movecraft.mapUpdater.update.BlockCreateCommand;
 import net.countercraft.movecraft.mapUpdater.update.UpdateCommand;
 import net.countercraft.movecraft.utils.*;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
@@ -238,8 +239,19 @@ public class AsyncManager extends BukkitRunnable {
             notifyP.sendMessage(event.getFailMessage());
             return;
         }
+        boolean hasCost = c.getType().getCost() > 0 && Movecraft.getInstance().getEco() != null;
+        if (hasCost) {
+            Economy eco = Movecraft.getInstance().getEco();
+            double cost = c.getType().getCost();
+            if (eco.has(p, cost)) {
+                eco.withdrawPlayer(p, cost);
+            } else {
+                notifyP.sendMessage(String.format(I18nSupport.getInternationalisedString("Detection - Failed Cannot afford craft"), eco.format(cost)));
+                return;
+            }
+        }
         notifyP.sendMessage(I18nSupport.getInternationalisedString("Detection - Successfully piloted craft")
-                + " Size: " + c.getHitBox().size());
+                + " Size: " + c.getHitBox().size() + (hasCost ? " | Cost: " + Movecraft.getInstance().getEco().format(c.getType().getCost()) : ""));
         Movecraft.getInstance().getLogger().info(String.format(
                 I18nSupport.getInternationalisedString("Detection - Success - Log Output"),
                 notifyP.getName(), c.getType().getCraftName(), c.getHitBox().size(),

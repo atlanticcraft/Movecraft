@@ -30,9 +30,11 @@ import net.countercraft.movecraft.mapUpdater.MapUpdateManager;
 import net.countercraft.movecraft.sign.*;
 import net.countercraft.movecraft.utils.LegacyUtils;
 import net.countercraft.movecraft.utils.UpdateManager;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
@@ -49,6 +51,7 @@ public class Movecraft extends JavaPlugin {
     private boolean shuttingDown;
     private boolean startup = true;
     private WorldHandler worldHandler;
+    private Economy eco;
 
 
     private AsyncManager asyncManager;
@@ -184,6 +187,13 @@ public class Movecraft extends JavaPlugin {
                 worldHandler.disableShadow(typ);
             }
         }
+
+        if (Movecraft.getInstance().getServer().getPluginManager().isPluginEnabled("Vault")) {
+            RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+            if (rsp != null) {
+                eco = rsp.getProvider();
+            }
+        }
         
         if (shuttingDown && Settings.IGNORE_RESET) {
             logger.log(
@@ -293,5 +303,9 @@ public class Movecraft extends JavaPlugin {
     }
 
     public AsyncManager getAsyncManager(){return asyncManager;}
+
+    public Economy getEco() {
+        return eco;
+    }
 }
 

@@ -130,6 +130,7 @@ final public class CraftType {
     private final boolean lockPilotAtDirectControl;
     private final int minWaterDepth;
     private final int maxWaterDepth;
+    private final double cost;
     @SuppressWarnings("unchecked")
     public CraftType(File f) {
         final Map data;
@@ -403,8 +404,9 @@ final public class CraftType {
         gearShiftsAffectDirectMovement = (boolean) data.getOrDefault("gearShiftsAffectDirectMovement", false);
         gearShiftsAffectCruiseSkipBlocks = (boolean) data.getOrDefault("gearShiftsAffectCruiseSkipBlocks", false);
         lockPilotAtDirectControl = (boolean) data.getOrDefault("lockPilotAtDirectControl", false);
-        minWaterDepth = (int) data.getOrDefault("minWaterDepth", 0);
-        maxWaterDepth = (int) data.getOrDefault("maxWaterDepth", -1);
+        minWaterDepth = integerFromObject(data.getOrDefault("minWaterDepth", 0));
+        maxWaterDepth = integerFromObject(data.getOrDefault("maxWaterDepth", -1));
+        cost = doubleFromObject(data.getOrDefault("cost", 0d));
     }
 
     private int integerFromObject(Object obj) {
@@ -1033,6 +1035,10 @@ final public class CraftType {
 
     public int getMaxWaterDepth() {
         return maxWaterDepth;
+    }
+
+    public double getCost() {
+        return cost;
     }
 
     public class TypeNotFoundException extends RuntimeException {
