@@ -401,10 +401,10 @@ public class TranslationTask extends AsyncTask {
 
             int waterDepth = newHitBox.getMinY() - testY - 1;
 
-            if (waterDepth < craft.getType().getMinWaterDepth()) {
+            if (craft.getType().getMinWaterDepth() > 0 && waterDepth < craft.getType().getMinWaterDepth()) {
                 fail(String.format(I18nSupport.getInternationalisedString("Translation - Failed Craft hit minimum water depth limit"), craft.getType().getMinWaterDepth()));
             }
-            if (waterDepth > craft.getType().getMaxWaterDepth()) {
+            if (craft.getType().getMaxWaterDepth() >= 0 && waterDepth > craft.getType().getMaxWaterDepth()) {
                 fail(String.format(I18nSupport.getInternationalisedString("Translation - Failed Craft hit maximum water depth limit"), craft.getType().getMaxWaterDepth()));
             }
         }
